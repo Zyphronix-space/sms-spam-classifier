@@ -1,0 +1,99 @@
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+  text-align: left;
+}
+
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: var(--text-muted, #888);
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.field textarea {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border, #444);
+  background: transparent;
+  color: inherit;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted, #888);
+}
+
+.example-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border, #444);
+  background: transparent;
+  color: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.example-chip:hover {
+  border-color: #646cff;
+}
+
+.form button[type='submit'] {
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  background: #646cff;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.form button[type='submit']:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.error {
+  color: #ff6b6b;
+  margin-top: 20px;
+}
+
+.result {
+  margin-top: 24px;
+  font-size: 1.2rem;
+}
+
+.result.spam strong {
+  color: #ff6b6b;
+}
+
+.result.ham strong {
+  color: #4ade80;
+}
