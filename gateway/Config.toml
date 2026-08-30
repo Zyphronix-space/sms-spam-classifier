@@ -1,0 +1,5 @@
+# Local dev config for the gateway service.
+# apiKey here is a demo value for local testing only — not a real secret.
+
+backendUrl = "http://localhost:8000"
+apiKey = "demo-secret-key-123"

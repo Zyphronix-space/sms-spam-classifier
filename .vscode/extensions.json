@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "wso2.ballerina",
+    "oxc.oxc-vscode"
+  ]
+}

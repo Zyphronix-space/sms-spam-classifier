@@ -3,3 +3,8 @@ uvicorn[standard]
 scikit-learn
 joblib
 pandas
+psycopg[binary]
+psycopg-pool
+bcrypt
+pyjwt
+python-dotenv

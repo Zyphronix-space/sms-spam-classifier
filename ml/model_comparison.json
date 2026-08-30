@@ -1,0 +1,17 @@
+{
+  "test_size": 0.2,
+  "results": [
+    {
+      "model": "Multinomial Naive Bayes",
+      "accuracy": 0.9704,
+      "f1_spam": 0.8755
+    },
+    {
+      "model": "Logistic Regression",
+      "accuracy": 0.9677,
+      "f1_spam": 0.8626
+    }
+  ],
+  "selected_model": "Multinomial Naive Bayes",
+  "selection_note": "Both models were evaluated using the same TF-IDF features and test split. The selected model is based on the measured results rather than assumption."
+}
