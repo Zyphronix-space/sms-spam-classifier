@@ -1,0 +1,29 @@
+name: Run database migrations
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "backend/migrations/**"
+      - "backend/migrate.py"
+      - ".github/workflows/migrate-db.yml"
+  workflow_dispatch: {}
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install migration dependencies
+        run: pip install psycopg[binary] python-dotenv
+
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.AZURE_DATABASE_URL }}
+        run: python migrate.py

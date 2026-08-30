@@ -8,7 +8,11 @@ from fastapi import APIRouter
 
 router = APIRouter(tags=["model"])
 
-ML_DIR = Path(__file__).resolve().parent.parent.parent / "ml"
+# Locally, ml/ is a sibling of backend/. In the Azure deployment package
+# only backend/ is uploaded, with artifacts bundled at backend/ml/ instead.
+_SIBLING_ML_DIR = Path(__file__).resolve().parent.parent.parent / "ml"
+_BUNDLED_ML_DIR = Path(__file__).resolve().parent.parent / "ml"
+ML_DIR = _SIBLING_ML_DIR if _SIBLING_ML_DIR.exists() else _BUNDLED_ML_DIR
 
 
 def _read_json(name: str) -> dict | None:

@@ -93,7 +93,7 @@ function proxyWithCookie(http:Request req, string method, string path) returns h
 
 @http:ServiceConfig {
     cors: {
-        allowOrigins: ["http://localhost:5173"],
+        allowOrigins: ["http://localhost:5173", "https://mango-grass-0eaa0a500.7.azurestaticapps.net"],
         allowMethods: ["GET", "POST", "DELETE"],
         allowHeaders: ["Content-Type", "x-api-key"],
         allowCredentials: true

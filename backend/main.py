@@ -23,7 +23,13 @@ import db
 from routers import auth_routes, model as model_router, scans, stats
 from routers.model import _read_json
 
-MODEL_DIR = Path(__file__).resolve().parent.parent / "ml"
+
+# Locally, ml/ is a sibling of backend/. In the Azure deployment package only
+# backend/ is uploaded, with the model artifacts bundled at backend/ml/
+# instead — support both layouts.
+_SIBLING_ML_DIR = Path(__file__).resolve().parent.parent / "ml"
+_BUNDLED_ML_DIR = Path(__file__).resolve().parent / "ml"
+MODEL_DIR = _SIBLING_ML_DIR if _SIBLING_ML_DIR.exists() else _BUNDLED_ML_DIR
 model = joblib.load(MODEL_DIR / "spam_model.joblib")
 vectorizer = joblib.load(MODEL_DIR / "vectorizer.joblib")
 SPAM_INDEX = list(model.classes_).index("spam")
