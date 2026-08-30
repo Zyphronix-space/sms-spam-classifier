@@ -14,6 +14,7 @@ function StatusDot({ ok }) {
 
 export default function Header({ theme, onCycleTheme, health, user, onLogout, onOpenAuth, activeTab, onChangeTab }) {
   const online = health?.gateway === 'online'
+  const tabs = user?.is_admin ? [...TABS, { id: 'admin', label: 'ADMIN' }] : TABS
 
   return (
     <header className="header">
@@ -53,7 +54,7 @@ export default function Header({ theme, onCycleTheme, health, user, onLogout, on
         </div>
       </div>
       <nav className="tabs mono" aria-label="Views">
-        {TABS.map((tab) => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"

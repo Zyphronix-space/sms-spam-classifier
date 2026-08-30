@@ -244,4 +244,32 @@ service / on new http:Listener(9000) {
         }
         return proxyWithCookie(req, "GET", "/model");
     }
+
+    resource function get admin/stats(http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        return proxyWithCookie(req, "GET", "/admin/stats");
+    }
+
+    resource function get admin/users(http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        return proxyWithCookie(req, "GET", "/admin/users");
+    }
+
+    resource function delete admin/users/[string id](http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        return proxyWithCookie(req, "DELETE", "/admin/users/" + id);
+    }
+
+    resource function get admin/scans(http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        return proxyWithCookie(req, "GET", "/admin/scans");
+    }
 }

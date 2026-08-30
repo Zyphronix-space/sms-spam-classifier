@@ -57,4 +57,8 @@ export const api = {
   unsaveScan: (id) => request(`/scans/${id}/save`, { method: 'DELETE' }),
   stats: () => request('/stats'),
   model: () => request('/model'),
+  adminStats: () => request('/admin/stats'),
+  adminUsers: () => request('/admin/users'),
+  adminDeleteUser: (id) => request(`/admin/users/${id}`, { method: 'DELETE' }),
+  adminScans: () => request('/admin/scans'),
 }

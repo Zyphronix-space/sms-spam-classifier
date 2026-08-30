@@ -12,7 +12,7 @@ from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
-from fastapi import Cookie, HTTPException, status
+from fastapi import Cookie, Depends, HTTPException, status
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "dev-only-insecure-secret-change-me")
 JWT_ALGORITHM = "HS256"
@@ -61,4 +61,17 @@ def get_current_user_required(sms_session: str | None = Cookie(default=None)) ->
     user = get_current_user_optional(sms_session)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="authentication required")
+    return user
+
+
+def get_current_admin(user: dict = Depends(get_current_user_required)) -> dict:
+    """Checked fresh against the database on every call — the JWT itself
+    carries no role claim, so a revoked admin flag takes effect immediately
+    instead of only after the token expires."""
+    import db  # local import: avoids a module-load-time cycle with db.py
+
+    with db.pool.connection() as conn:
+        row = conn.execute("SELECT is_admin FROM users WHERE id = %s", (user["sub"],)).fetchone()
+    if row is None or not row[0]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="admin access required")
     return user

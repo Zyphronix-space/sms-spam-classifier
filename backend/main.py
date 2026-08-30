@@ -20,7 +20,7 @@ load_dotenv()  # must run before importing auth/db, which read env vars at impor
 
 import auth
 import db
-from routers import auth_routes, model as model_router, scans, stats
+from routers import admin, auth_routes, model as model_router, scans, stats
 from routers.model import _read_json
 
 
@@ -91,6 +91,7 @@ app.include_router(auth_routes.router)
 app.include_router(scans.router)
 app.include_router(stats.router)
 app.include_router(model_router.router)
+app.include_router(admin.router)
 
 
 class MessageInput(BaseModel):

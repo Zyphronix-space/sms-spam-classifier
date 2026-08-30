@@ -29,6 +29,7 @@ class LoginInput(BaseModel):
 class UserOut(BaseModel):
     id: str
     email: str
+    is_admin: bool = False
 
 
 def _set_session_cookie(response: Response, user_id: str, email: str) -> None:
@@ -54,7 +55,7 @@ def register(payload: RegisterInput, response: Response):
     try:
         with db.pool.connection() as conn:
             row = conn.execute(
-                "INSERT INTO users (email, password_hash) VALUES (%s, %s) RETURNING id, email",
+                "INSERT INTO users (email, password_hash) VALUES (%s, %s) RETURNING id, email, is_admin",
                 (email, password_hash),
             ).fetchone()
     except psycopg.errors.UniqueViolation:
@@ -62,9 +63,9 @@ def register(payload: RegisterInput, response: Response):
     except Exception:
         raise HTTPException(status_code=500, detail="could not create account")
 
-    user_id, user_email = row
+    user_id, user_email, is_admin = row
     _set_session_cookie(response, str(user_id), user_email)
-    return UserOut(id=str(user_id), email=user_email)
+    return UserOut(id=str(user_id), email=user_email, is_admin=is_admin)
 
 
 @router.post("/login", response_model=UserOut)
@@ -73,7 +74,7 @@ def login(payload: LoginInput, response: Response):
     try:
         with db.pool.connection() as conn:
             row = conn.execute(
-                "SELECT id, email, password_hash FROM users WHERE email = %s",
+                "SELECT id, email, password_hash, is_admin FROM users WHERE email = %s",
                 (email,),
             ).fetchone()
     except Exception:
@@ -82,9 +83,9 @@ def login(payload: LoginInput, response: Response):
     if row is None or not auth.verify_password(payload.password, row[2]):
         raise HTTPException(status_code=401, detail="invalid email or password")
 
-    user_id, user_email, _ = row
+    user_id, user_email, _, is_admin = row
     _set_session_cookie(response, str(user_id), user_email)
-    return UserOut(id=str(user_id), email=user_email)
+    return UserOut(id=str(user_id), email=user_email, is_admin=is_admin)
 
 
 @router.post("/logout")
@@ -100,4 +101,10 @@ def logout(response: Response):
 
 @router.get("/me", response_model=UserOut)
 def me(user: dict = Depends(auth.get_current_user_required)):
-    return UserOut(id=user["sub"], email=user["email"])
+    try:
+        with db.pool.connection() as conn:
+            row = conn.execute("SELECT is_admin FROM users WHERE id = %s", (user["sub"],)).fetchone()
+    except Exception:
+        raise HTTPException(status_code=500, detail="could not load account")
+    is_admin = bool(row[0]) if row else False
+    return UserOut(id=user["sub"], email=user["email"], is_admin=is_admin)

@@ -9,6 +9,7 @@ import ScanHistory from './components/ScanHistory'
 import BatchScanner from './components/BatchScanner'
 import ModelLab from './components/ModelLab'
 import Statistics from './components/Statistics'
+import AdminPanel from './components/AdminPanel'
 import Auth from './components/Auth'
 import { api, ApiError } from './lib/api'
 import { addLocalScan } from './lib/localHistory'
@@ -233,6 +234,7 @@ function App() {
         {activeTab === 'history' && <ScanHistory user={user} refreshKey={historyRefreshKey} />}
         {activeTab === 'stats' && <Statistics user={user} refreshKey={historyRefreshKey} />}
         {activeTab === 'model' && <ModelLab />}
+        {activeTab === 'admin' && user?.is_admin && <AdminPanel />}
       </main>
 
       {authView && (

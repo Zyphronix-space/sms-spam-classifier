@@ -582,6 +582,33 @@
   font-size: 11px;
 }
 
+/* ---------- admin ---------- */
+.admin-user-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+}
+.admin-user-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 4px;
+}
+.admin-user-email {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--sans);
+  color: var(--text);
+}
+
 /* ---------- batch ---------- */
 .batch-results {
   margin-top: 18px;
