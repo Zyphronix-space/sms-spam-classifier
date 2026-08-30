@@ -19,6 +19,12 @@ JWT_ALGORITHM = "HS256"
 TOKEN_TTL = timedelta(days=7)
 COOKIE_NAME = "sms_session"
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "false").lower() == "true"
+# "lax" for local dev (frontend/gateway share the "localhost" site across
+# ports). In production the frontend (Static Web Apps) and gateway
+# (Container Apps) are on different domains, so this must be "none" —
+# which requires COOKIE_SECURE=true, since browsers reject SameSite=None
+# cookies that aren't Secure.
+COOKIE_SAMESITE = os.environ.get("COOKIE_SAMESITE", "lax")
 
 
 def hash_password(password: str) -> str:

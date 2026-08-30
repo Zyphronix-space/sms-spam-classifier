@@ -37,7 +37,7 @@ def _set_session_cookie(response: Response, user_id: str, email: str) -> None:
         key=auth.COOKIE_NAME,
         value=token,
         httponly=True,
-        samesite="lax",
+        samesite=auth.COOKIE_SAMESITE,
         secure=auth.COOKIE_SECURE,
         max_age=int(auth.TOKEN_TTL.total_seconds()),
         path="/",
@@ -89,7 +89,12 @@ def login(payload: LoginInput, response: Response):
 
 @router.post("/logout")
 def logout(response: Response):
-    response.delete_cookie(key=auth.COOKIE_NAME, path="/")
+    response.delete_cookie(
+        key=auth.COOKIE_NAME,
+        path="/",
+        samesite=auth.COOKIE_SAMESITE,
+        secure=auth.COOKIE_SECURE,
+    )
     return {"message": "logged out"}
 
 
