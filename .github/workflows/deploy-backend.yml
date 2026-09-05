@@ -1,0 +1,34 @@
+name: Deploy backend to Azure App Service
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "backend/**"
+      - "ml/**"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch: {}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Locally, ml/ is a sibling of backend/. The Azure package only
+      # uploads backend/, so the model artifacts are bundled at
+      # backend/ml/ instead (see backend/classify.py, backend/routers/model.py).
+      - name: Bundle ML model artifacts into backend/ml
+        run: |
+          mkdir -p backend/ml
+          cp ml/spam_model.joblib backend/ml/
+          cp ml/vectorizer.joblib backend/ml/
+          cp ml/evaluation.json backend/ml/
+          cp ml/model_comparison.json backend/ml/
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: sms-classifier-api-stephan
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: backend
