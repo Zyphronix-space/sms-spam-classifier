@@ -8,12 +8,14 @@ import {
   LineChart,
   Pie,
   PieChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
+import { ResponsiveContainer, glassTooltipStyle } from './glass/GlassChart'
+import GlassButton from './glass/GlassButton'
 
 function formatTime(iso) {
   try {
@@ -23,7 +25,8 @@ function formatTime(iso) {
   }
 }
 
-export default function Dashboard({ refreshKey, onOpenMessage }) {
+export default function Dashboard({ refreshKey }) {
+  const navigate = useNavigate()
   const [data, setData] = useState(null)
   const [modelData, setModelData] = useState(null)
   const [error, setError] = useState(null)
@@ -62,10 +65,11 @@ export default function Dashboard({ refreshKey, onOpenMessage }) {
     return (
       <section className="panel empty-state" aria-labelledby="dashboard-heading">
         <h2 id="dashboard-heading" className="panel-title mono">
-          DASHBOARD
+          SECURITY OVERVIEW
         </h2>
         <p className="text-muted mono">NO MESSAGES YET</p>
-        <p className="text-faint">Classify a message to start building your dashboard.</p>
+        <p className="text-faint">Analyze a message to start building your security overview.</p>
+        <GlassButton onClick={() => navigate('/app/analyze')}>ANALYZE MESSAGE</GlassButton>
       </section>
     )
   }
@@ -87,10 +91,15 @@ export default function Dashboard({ refreshKey, onOpenMessage }) {
   return (
     <div className="dashboard-grid">
       <section className="panel" aria-labelledby="dashboard-heading">
-        <h2 id="dashboard-heading" className="panel-title mono">
-          DASHBOARD
-        </h2>
-        <p className="text-faint mono">YOUR ACTIVITY · LIVE FROM POSTGRESQL</p>
+        <div className="panel-header">
+          <div>
+            <h2 id="dashboard-heading" className="panel-title mono">
+              SECURITY OVERVIEW
+            </h2>
+            <p className="text-faint mono">YOUR ACTIVITY · LIVE FROM POSTGRESQL</p>
+          </div>
+          <GlassButton onClick={() => navigate('/app/analyze')}>ANALYZE MESSAGE</GlassButton>
+        </div>
         <div className="stats-grid mono">
           <div>
             <span className="metric-label">TOTAL MESSAGES</span>
@@ -98,7 +107,7 @@ export default function Dashboard({ refreshKey, onOpenMessage }) {
           </div>
           <div>
             <span className="metric-label">SPAM</span>
-            <span className="metric-value text-accent">{data.spam_count}</span>
+            <span className="metric-value text-danger">{data.spam_count}</span>
           </div>
           <div>
             <span className="metric-label">LEGITIMATE</span>
@@ -115,10 +124,10 @@ export default function Dashboard({ refreshKey, onOpenMessage }) {
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
             <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={2}>
-              <Cell fill="var(--accent)" />
+              <Cell fill="var(--danger)" />
               <Cell fill="var(--success)" />
             </Pie>
-            <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12 }} />
+            <Tooltip contentStyle={glassTooltipStyle} />
           </PieChart>
         </ResponsiveContainer>
       </section>
@@ -132,8 +141,8 @@ export default function Dashboard({ refreshKey, onOpenMessage }) {
             <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
             <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="var(--text-faint)" tickFormatter={(d) => d.slice(5)} />
             <YAxis tick={{ fontSize: 10 }} stroke="var(--text-faint)" allowDecimals={false} />
-            <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12 }} />
-            <Line type="monotone" dataKey="spam" stroke="var(--accent)" strokeWidth={2} dot={false} />
+            <Tooltip contentStyle={glassTooltipStyle} />
+            <Line type="monotone" dataKey="spam" stroke="var(--danger)" strokeWidth={2} dot={false} />
             <Line type="monotone" dataKey="ham" stroke="var(--success)" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
@@ -150,7 +159,7 @@ export default function Dashboard({ refreshKey, onOpenMessage }) {
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="var(--text-faint)" />
               <YAxis tick={{ fontSize: 10 }} stroke="var(--text-faint)" domain={[0, 100]} />
-              <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12 }} />
+              <Tooltip contentStyle={glassTooltipStyle} />
               <Bar dataKey="value" fill="var(--text)" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -164,12 +173,12 @@ export default function Dashboard({ refreshKey, onOpenMessage }) {
         <ol className="history-list mono">
           {data.recent_predictions.map((r, i) => (
             <li key={r.id}>
-              <button type="button" className="history-row" onClick={() => onOpenMessage?.(r.id)}>
+              <button type="button" className="history-row" onClick={() => navigate(`/app/history?open=${r.id}`)}>
                 <span className="history-index">{String(i + 1).padStart(2, '0')}</span>
                 <span className="history-preview">
                   {r.message} · {formatTime(r.created_at)}
                 </span>
-                <span className={r.classification === 'spam' ? 'text-accent' : 'text-success'}>
+                <span className={r.classification === 'spam' ? 'text-danger' : 'text-success'}>
                   {r.classification.toUpperCase()} {(r.spam_probability * 100).toFixed(1)}%
                 </span>
               </button>

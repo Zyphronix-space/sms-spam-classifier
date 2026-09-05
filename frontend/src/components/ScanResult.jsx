@@ -53,6 +53,16 @@ export default function ScanResult({ result, message, onCopy, onExport, messageI
         <p className="mono">
           {result.label.toUpperCase()} · {pct.toFixed(2)}%
         </p>
+        <div className="tech-details">
+          <div>
+            <dt>MODEL</dt>
+            <dd className="mono">Multinomial Naive Bayes</dd>
+          </div>
+          <div>
+            <dt>ANALYZED</dt>
+            <dd className="mono">{result.created_at ? new Date(result.created_at).toLocaleString() : new Date().toLocaleString()}</dd>
+          </div>
+        </div>
       </div>
 
       <div className="divider" />

@@ -7,7 +7,9 @@ logins would be unnecessary state for what a signed, expiring token already
 gives us.
 """
 
+import hashlib
 import os
+import secrets
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -62,6 +64,22 @@ def get_current_user_required(sms_session: str | None = Cookie(default=None)) ->
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="authentication required")
     return user
+
+
+RESET_TOKEN_TTL = timedelta(minutes=30)
+
+
+def generate_reset_token() -> str:
+    """A URL-safe random token handed to the caller exactly once. Only its
+    hash (below) is ever persisted."""
+    return secrets.token_urlsafe(32)
+
+
+def hash_token(token: str) -> str:
+    """SHA-256 is fine here (unlike passwords, this token is already
+    high-entropy random data, not something a dictionary attack could
+    guess) -- same idea as GitHub/Django's reset-token storage."""
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
 def get_current_admin(user: dict = Depends(get_current_user_required)) -> dict:

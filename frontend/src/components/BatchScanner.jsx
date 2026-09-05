@@ -2,7 +2,8 @@ import { useRef, useState } from 'react'
 import { api, ApiError } from '../lib/api'
 import { useToast } from './Toast'
 
-export default function BatchScanner({ user, onSaved }) {
+// Always rendered behind RequireAuth (see lib/session.jsx).
+export default function BatchScanner({ onSaved }) {
   const toast = useToast()
   const fileInputRef = useRef(null)
   const [fileName, setFileName] = useState('')
@@ -59,22 +60,10 @@ export default function BatchScanner({ user, onSaved }) {
     }
   }
 
-  if (!user) {
-    return (
-      <section className="panel batch empty-state" aria-labelledby="batch-heading">
-        <h2 id="batch-heading" className="panel-title mono">
-          BATCH SCAN
-        </h2>
-        <p className="text-muted mono">SIGN IN REQUIRED</p>
-        <p className="text-faint">CSV batch scanning saves results to your account — log in or register to use it.</p>
-      </section>
-    )
-  }
-
   return (
     <section className="panel batch" aria-labelledby="batch-heading">
       <h2 id="batch-heading" className="panel-title mono">
-        BATCH SCAN
+        BATCH ANALYSIS
       </h2>
       <p className="text-faint mono">UPLOAD A CSV WITH A "message" COLUMN (OR "text"/"sms") — UP TO 500 ROWS, 1MB</p>
 
@@ -117,7 +106,7 @@ export default function BatchScanner({ user, onSaved }) {
             </div>
             <div>
               <span className="metric-label">SPAM</span>
-              <span className="metric-value text-accent">{result.spam_count}</span>
+              <span className="metric-value text-danger">{result.spam_count}</span>
             </div>
             <div>
               <span className="metric-label">LEGITIMATE</span>
@@ -143,7 +132,7 @@ export default function BatchScanner({ user, onSaved }) {
                 ) : (
                   <>
                     <span className="history-preview">{r.message}</span>
-                    <span className={r.classification === 'spam' ? 'text-accent' : 'text-success'}>
+                    <span className={r.classification === 'spam' ? 'text-danger' : 'text-success'}>
                       {r.classification.toUpperCase()} {(r.spam_probability * 100).toFixed(1)}%
                     </span>
                   </>

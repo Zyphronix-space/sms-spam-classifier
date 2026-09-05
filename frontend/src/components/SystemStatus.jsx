@@ -2,7 +2,7 @@ function Row({ label, ok }) {
   return (
     <li>
       <span>{label}</span>
-      <span className={ok ? 'text-success' : 'text-accent'}>
+      <span className={ok ? 'text-success' : 'text-danger'}>
         <span className={`status-dot ${ok ? 'status-dot--ok' : 'status-dot--down'}`} aria-hidden="true" />
         {ok ? 'ONLINE' : 'OFFLINE'}
       </span>

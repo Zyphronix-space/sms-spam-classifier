@@ -49,12 +49,18 @@ export default function ModelLab() {
   return (
     <section className="panel model-lab" aria-labelledby="model-heading">
       <h2 id="model-heading" className="panel-title mono">
-        MODEL LAB
+        MODEL PERFORMANCE
       </h2>
 
       <p className="panel-subtitle mono">CURRENT MODEL</p>
       <p className="model-name mono">{modelDisplayName}</p>
       <p className="text-muted mono">TF-IDF FEATURES · TRAINED {new Date(evaluation.trained_at).toLocaleDateString()}</p>
+      <p className="text-faint">
+        Architecture: raw message text is converted to TF-IDF (term-frequency, inverse-document-frequency)
+        vectors, then classified by a Multinomial Naive Bayes model trained on an 80/20 train/test split of
+        the dataset below. Every metric on this page comes from that evaluation run — nothing here is
+        hand-tuned display data.
+      </p>
 
       <div className="metric-grid mono">
         <div>

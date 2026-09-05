@@ -20,6 +20,7 @@ not per TestClient). TestClient instances are created without entering
 their `with` context, so per-test requests never re-trigger lifespan.
 """
 
+import os
 import sys
 import uuid
 from pathlib import Path
@@ -27,6 +28,13 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+# The suite registers dozens of throwaway users back-to-back from the same
+# TestClient "IP" -- disable the auth rate limiter globally here so that
+# behavior doesn't trip on normal test volume. test_password_reset.py
+# re-enables it (via monkeypatch) for the one test that actually exercises
+# it.
+os.environ["RATE_LIMIT_DISABLED"] = "true"
 
 import main  # noqa: E402  (runs load_dotenv() before db is imported below)
 import db  # noqa: E402

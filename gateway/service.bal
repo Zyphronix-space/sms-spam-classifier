@@ -133,10 +133,25 @@ function proxyPutWithBody(http:Request req, string path) returns http:Response {
     return relayResponse(backendResp);
 }
 
+// PATCH variant of proxyPutWithBody — used for PATCH /auth/change-password.
+function proxyPatchWithBody(http:Request req, string path) returns http:Response {
+    map<string|string[]> headers = forwardedHeaders(req);
+    json|error payload = req.getJsonPayload();
+    if payload is error {
+        return jsonError(400, "request body must be JSON");
+    }
+    http:Response|error backendResp = backendClient->patch(path, payload, headers);
+    if backendResp is error {
+        log:printError("backend call failed", 'error = backendResp);
+        return jsonError(502, "backend unavailable");
+    }
+    return relayResponse(backendResp);
+}
+
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["http://localhost:5173", "https://mango-grass-0eaa0a500.7.azurestaticapps.net"],
-        allowMethods: ["GET", "POST", "PUT", "DELETE"],
+        allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
         allowHeaders: ["Content-Type", "x-api-key"],
         allowCredentials: true
     }
@@ -222,6 +237,52 @@ service / on new http:Listener(9000) {
             return jsonError(502, "auth service unavailable");
         }
         return relayResponse(backendResp);
+    }
+
+    resource function post auth/forgot\-password(http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        json|error payload = req.getJsonPayload();
+        if payload is error {
+            return jsonError(400, "request body must be JSON");
+        }
+        http:Response|error backendResp = backendClient->post("/auth/forgot-password", req);
+        if backendResp is error {
+            log:printError("backend call failed", 'error = backendResp);
+            return jsonError(502, "auth service unavailable");
+        }
+        return relayResponse(backendResp);
+    }
+
+    resource function post auth/reset\-password(http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        json|error payload = req.getJsonPayload();
+        if payload is error {
+            return jsonError(400, "request body must be JSON");
+        }
+        http:Response|error backendResp = backendClient->post("/auth/reset-password", req);
+        if backendResp is error {
+            log:printError("backend call failed", 'error = backendResp);
+            return jsonError(502, "auth service unavailable");
+        }
+        return relayResponse(backendResp);
+    }
+
+    resource function patch auth/change\-password(http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        return proxyPatchWithBody(req, "/auth/change-password");
+    }
+
+    resource function delete auth/me(http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        return proxyWithCookie(req, "DELETE", "/auth/me");
     }
 
     resource function post auth/logout(http:Request req) returns http:Response {

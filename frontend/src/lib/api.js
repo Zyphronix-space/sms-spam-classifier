@@ -38,6 +38,7 @@ async function request(path, { method = 'GET', body, formData } = {}) {
     if (res.status === 401) throw new ApiError(401, 'UNAUTHORIZED', detail)
     if (res.status === 404) throw new ApiError(404, 'NOT_FOUND', detail)
     if (res.status === 409) throw new ApiError(409, 'CONFLICT', detail)
+    if (res.status === 429) throw new ApiError(429, 'RATE_LIMITED', detail)
     if (res.status === 400 || res.status === 422) throw new ApiError(res.status, 'BAD_REQUEST', detail)
     if (res.status === 502 || res.status === 503) throw new ApiError(res.status, 'BACKEND_OFFLINE', detail)
     throw new ApiError(res.status, 'REQUEST_FAILED', detail)
@@ -61,6 +62,15 @@ export const api = {
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password } }),
   logout: () => request('/auth/logout', { method: 'POST' }),
   me: () => request('/auth/me'),
+  forgotPassword: (email) => request('/auth/forgot-password', { method: 'POST', body: { email } }),
+  resetPassword: (token, newPassword) =>
+    request('/auth/reset-password', { method: 'POST', body: { token, new_password: newPassword } }),
+  changePassword: (currentPassword, newPassword) =>
+    request('/auth/change-password', {
+      method: 'PATCH',
+      body: { current_password: currentPassword, new_password: newPassword },
+    }),
+  deleteAccount: () => request('/auth/me', { method: 'DELETE' }),
 
   // Messages — the persisted, searchable store that replaced /scans.
   createMessage: (message) => request('/messages', { method: 'POST', body: { message } }),

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api, ApiError } from '../lib/api'
-import { loadLocalHistory, clearLocalHistory } from '../lib/localHistory'
 import { analyzePatterns } from '../lib/heuristics'
 import ConfirmDialog from './ConfirmDialog'
 import FeedbackWidget from './FeedbackWidget'
@@ -14,7 +13,9 @@ function formatTime(iso) {
   }
 }
 
-export default function MessageHistory({ user, refreshKey, openMessageId, onOpenedMessage }) {
+// Always rendered behind RequireAuth (see lib/session.jsx) — there is no
+// anonymous/local-only variant of this page.
+export default function MessageHistory({ refreshKey, openMessageId, onOpenedMessage }) {
   const toast = useToast()
   const [messages, setMessages] = useState([])
   const [selected, setSelected] = useState(null)
@@ -29,10 +30,6 @@ export default function MessageHistory({ user, refreshKey, openMessageId, onOpen
   const [saving, setSaving] = useState(false)
 
   const load = () => {
-    if (!user) {
-      setMessages(loadLocalHistory())
-      return
-    }
     setLoading(true)
     setError(null)
     api
@@ -45,23 +42,19 @@ export default function MessageHistory({ user, refreshKey, openMessageId, onOpen
   useEffect(() => {
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, refreshKey, q, classification, sort])
+  }, [refreshKey, q, classification, sort])
 
   // Deep-link from Dashboard's "recent predictions" list.
   useEffect(() => {
-    if (!openMessageId || !user) return
+    if (!openMessageId) return
     api
       .getMessage(openMessageId)
       .then((m) => setSelected(m))
       .catch(() => {})
       .finally(() => onOpenedMessage?.())
-  }, [openMessageId, user, onOpenedMessage])
+  }, [openMessageId, onOpenedMessage])
 
   const openDetail = async (row) => {
-    if (!user) {
-      setSelected(row)
-      return
-    }
     try {
       const detail = await api.getMessage(row.id)
       setSelected(detail)
@@ -69,16 +62,6 @@ export default function MessageHistory({ user, refreshKey, openMessageId, onOpen
     } catch {
       toast.error('Could not load message detail.')
     }
-  }
-
-  const handleClearAll = async () => {
-    if (user) {
-      toast.error('Delete messages individually from the history list.')
-      return
-    }
-    clearLocalHistory()
-    setMessages([])
-    setSelected(null)
   }
 
   const confirmDelete = async () => {
@@ -122,41 +105,32 @@ export default function MessageHistory({ user, refreshKey, openMessageId, onOpen
     <section className="panel history" aria-labelledby="history-heading">
       <div className="panel-header">
         <h2 id="history-heading" className="panel-title mono">
-          {user ? 'MESSAGE HISTORY' : 'LOCAL HISTORY'}
+          MESSAGE HISTORY
         </h2>
-        {!user && (
-          <button type="button" className="btn-ghost mono" onClick={handleClearAll} disabled={messages.length === 0}>
-            CLEAR HISTORY
-          </button>
-        )}
       </div>
-      <p className="text-faint mono">
-        {user ? 'PERSISTED IN POSTGRESQL FOR YOUR ACCOUNT' : 'STORED ONLY IN THIS BROWSER (LOCALSTORAGE)'}
-      </p>
+      <p className="text-faint mono">PERSISTED IN POSTGRESQL FOR YOUR ACCOUNT</p>
 
-      {user && (
-        <div className="history-filters mono">
-          <input
-            type="search"
-            className="history-search"
-            placeholder="SEARCH MESSAGES…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            aria-label="Search messages"
-          />
-          <select value={classification} onChange={(e) => setClassification(e.target.value)} aria-label="Filter by classification">
-            <option value="">ALL</option>
-            <option value="spam">SPAM ONLY</option>
-            <option value="ham">HAM ONLY</option>
-          </select>
-          <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort order">
-            <option value="created_at_desc">NEWEST FIRST</option>
-            <option value="created_at_asc">OLDEST FIRST</option>
-            <option value="probability_desc">HIGHEST SPAM SCORE</option>
-            <option value="probability_asc">LOWEST SPAM SCORE</option>
-          </select>
-        </div>
-      )}
+      <div className="history-filters mono">
+        <input
+          type="search"
+          className="history-search"
+          placeholder="SEARCH MESSAGES…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          aria-label="Search messages"
+        />
+        <select value={classification} onChange={(e) => setClassification(e.target.value)} aria-label="Filter by classification">
+          <option value="">ALL</option>
+          <option value="spam">SPAM ONLY</option>
+          <option value="ham">HAM ONLY</option>
+        </select>
+        <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort order">
+          <option value="created_at_desc">NEWEST FIRST</option>
+          <option value="created_at_asc">OLDEST FIRST</option>
+          <option value="probability_desc">HIGHEST SPAM SCORE</option>
+          <option value="probability_asc">LOWEST SPAM SCORE</option>
+        </select>
+      </div>
 
       {error && <p className="error-text mono">{error}</p>}
       {loading && <p className="text-muted mono">LOADING…</p>}
@@ -164,31 +138,40 @@ export default function MessageHistory({ user, refreshKey, openMessageId, onOpen
       {!loading && messages.length === 0 ? (
         <div className="empty-state">
           <p className="text-muted mono">NO MESSAGES YET</p>
-          <p className="text-faint">Classify a message from the Classifier page to see it here.</p>
+          <p className="text-faint">Analyze a message from the Analyze page to see it here.</p>
         </div>
       ) : (
         <ol className="history-list mono">
           {messages.map((m, i) => (
             <li key={m.id}>
-              <button type="button" className="history-row" onClick={() => openDetail(m)}>
+              <div
+                className="history-row"
+                role="button"
+                tabIndex={0}
+                onClick={() => openDetail(m)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    openDetail(m)
+                  }
+                }}
+              >
                 <span className="history-index">{String(i + 1).padStart(2, '0')}</span>
-                <span className="history-preview">{m.message || m.preview || '(message not stored)'}</span>
-                <span className={m.classification === 'spam' ? 'text-accent' : 'text-success'}>
+                <span className="history-preview">{m.message}</span>
+                <span className={m.classification === 'spam' ? 'text-danger' : 'text-success'}>
                   {m.classification.toUpperCase()} {(m.spam_probability * 100).toFixed(1)}%
                 </span>
-                {user && (
-                  <button
-                    type="button"
-                    className="btn-ghost history-delete"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setPendingDelete(m.id)
-                    }}
-                  >
-                    DELETE
-                  </button>
-                )}
-              </button>
+                <button
+                  type="button"
+                  className="btn-ghost history-delete"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setPendingDelete(m.id)
+                  }}
+                >
+                  DELETE
+                </button>
+              </div>
             </li>
           ))}
         </ol>
@@ -222,18 +205,12 @@ export default function MessageHistory({ user, refreshKey, openMessageId, onOpen
                   ))}
                 </ul>
               )}
-              {user && (
-                <>
-                  <div className="divider" />
-                  <FeedbackWidget messageId={selected.id} existing={selected.feedback} />
-                </>
-              )}
+              <div className="divider" />
+              <FeedbackWidget messageId={selected.id} existing={selected.feedback} />
               <div className="confirm-actions">
-                {user && (
-                  <button type="button" className="btn-ghost" onClick={startEdit}>
-                    EDIT
-                  </button>
-                )}
+                <button type="button" className="btn-ghost" onClick={startEdit}>
+                  EDIT
+                </button>
                 <button type="button" className="btn-ghost" onClick={() => setSelected(null)}>
                   CLOSE
                 </button>

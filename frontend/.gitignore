@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Local-only dev overrides (e.g. pointing VITE_API_URL at a direct backend
+# for local testing) -- .env.production and .env.example stay tracked.
+.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

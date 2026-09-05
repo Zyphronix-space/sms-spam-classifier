@@ -128,7 +128,7 @@ export default function AdminPanel() {
                   <span className="history-preview">
                     {s.user_email} · {formatTime(s.created_at)}
                   </span>
-                  <span className={s.classification === 'spam' ? 'text-accent' : 'text-success'}>
+                  <span className={s.classification === 'spam' ? 'text-danger' : 'text-success'}>
                     {s.classification.toUpperCase()} {(s.spam_probability * 100).toFixed(1)}%
                   </span>
                 </div>

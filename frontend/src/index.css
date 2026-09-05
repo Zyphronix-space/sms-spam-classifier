@@ -1,28 +1,38 @@
-/* Design tokens — original monochrome/technical system, not a copy of any
-   vendor's UI kit. Light is the base :root palette; dark overrides via
-   prefers-color-scheme and via the explicit [data-theme] toggle. */
+/* SpamShield "Liquid Glass" design tokens — blue/white/dark-navy, with a
+   dedicated --danger red reserved for spam/threat/failure states only
+   (never used as the general brand color). Light is the base :root
+   palette; dark overrides via prefers-color-scheme and the explicit
+   [data-theme] toggle. */
 :root {
-  --bg: #f4f4f2;
+  --bg: #f3f6fc;
   --surface: #ffffff;
-  --surface-raised: #fafaf9;
-  --text: #0a0a0a;
-  --text-muted: #6b6b6b;
-  --text-faint: #9c9c98;
-  --border: #dcdcd8;
-  --border-strong: #0a0a0a;
-  --accent: #d4392e;
-  --accent-bg: rgba(212, 57, 46, 0.08);
-  --accent-strong: #b8291f;
-  --success: #1f6d4c;
-  --success-bg: rgba(31, 109, 76, 0.08);
-  --dot-grid: rgba(10, 10, 10, 0.06);
-  --shadow: 0 1px 0 rgba(10, 10, 10, 0.04);
+  --surface-raised: #f8fafd;
+  --text: #0b1424;
+  --text-muted: #556076;
+  --text-faint: #93a0b8;
+  --border: #dde5f2;
+  --border-strong: #0b1424;
+  --navy: #0b1424;
 
-  --glass-bg: rgba(255, 255, 255, 0.55);
-  --glass-bg-raised: rgba(255, 255, 255, 0.68);
-  --glass-border: rgba(10, 10, 10, 0.08);
-  --glass-highlight: rgba(255, 255, 255, 0.8);
-  --glass-shadow: 0 1px 1px rgba(10, 10, 10, 0.03), 0 12px 32px -16px rgba(10, 10, 10, 0.18);
+  --accent: #2f6fed;
+  --accent-bg: rgba(47, 111, 237, 0.08);
+  --accent-strong: #1f52c4;
+
+  --danger: #d8463c;
+  --danger-bg: rgba(216, 70, 60, 0.08);
+  --danger-strong: #b8362d;
+
+  --success: #1f9d67;
+  --success-bg: rgba(31, 157, 103, 0.08);
+
+  --dot-grid: rgba(11, 20, 36, 0.05);
+  --shadow: 0 1px 0 rgba(11, 20, 36, 0.04);
+
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-bg-raised: rgba(255, 255, 255, 0.74);
+  --glass-border: rgba(11, 20, 36, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-shadow: 0 1px 1px rgba(11, 20, 36, 0.03), 0 12px 32px -16px rgba(11, 20, 36, 0.18);
   --glass-blur: blur(20px) saturate(160%);
 
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -33,51 +43,67 @@
 
 :root:not([data-theme='light']) {
   @media (prefers-color-scheme: dark) {
-    --bg: #0a0a0a;
-    --surface: #121212;
-    --surface-raised: #161616;
-    --text: #f3f3f1;
-    --text-muted: #8f8f8b;
-    --text-faint: #5c5c58;
-    --border: #262624;
-    --border-strong: #f3f3f1;
-    --accent: #ff5140;
-    --accent-bg: rgba(255, 81, 64, 0.12);
-    --accent-strong: #ff7061;
-    --success: #3ddc97;
-    --success-bg: rgba(61, 220, 151, 0.1);
-    --dot-grid: rgba(255, 255, 255, 0.07);
+    --bg: #060b16;
+    --surface: #0d1526;
+    --surface-raised: #111c30;
+    --text: #edf2fb;
+    --text-muted: #93a1c0;
+    --text-faint: #576389;
+    --border: #1f2c47;
+    --border-strong: #edf2fb;
+    --navy: #060b16;
+
+    --accent: #5b8def;
+    --accent-bg: rgba(91, 141, 239, 0.14);
+    --accent-strong: #85aefb;
+
+    --danger: #ff6b61;
+    --danger-bg: rgba(255, 107, 97, 0.12);
+    --danger-strong: #ff8b83;
+
+    --success: #34d399;
+    --success-bg: rgba(52, 211, 153, 0.1);
+
+    --dot-grid: rgba(255, 255, 255, 0.05);
     --shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
-    --glass-bg: rgba(20, 20, 20, 0.5);
-    --glass-bg-raised: rgba(28, 28, 28, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.09);
-    --glass-highlight: rgba(255, 255, 255, 0.07);
-    --glass-shadow: 0 1px 1px rgba(255, 255, 255, 0.04), 0 16px 40px -16px rgba(0, 0, 0, 0.6);
+    --glass-bg: rgba(13, 21, 38, 0.55);
+    --glass-bg-raised: rgba(17, 28, 48, 0.66);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-highlight: rgba(255, 255, 255, 0.06);
+    --glass-shadow: 0 1px 1px rgba(255, 255, 255, 0.04), 0 16px 40px -16px rgba(0, 0, 0, 0.65);
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: #0a0a0a;
-  --surface: #121212;
-  --surface-raised: #161616;
-  --text: #f3f3f1;
-  --text-muted: #8f8f8b;
-  --text-faint: #5c5c58;
-  --border: #262624;
-  --border-strong: #f3f3f1;
-  --accent: #ff5140;
-  --accent-bg: rgba(255, 81, 64, 0.12);
-  --accent-strong: #ff7061;
-  --success: #3ddc97;
-  --success-bg: rgba(61, 220, 151, 0.1);
-  --dot-grid: rgba(255, 255, 255, 0.07);
+  --bg: #060b16;
+  --surface: #0d1526;
+  --surface-raised: #111c30;
+  --text: #edf2fb;
+  --text-muted: #93a1c0;
+  --text-faint: #576389;
+  --border: #1f2c47;
+  --border-strong: #edf2fb;
+  --navy: #060b16;
+
+  --accent: #5b8def;
+  --accent-bg: rgba(91, 141, 239, 0.14);
+  --accent-strong: #85aefb;
+
+  --danger: #ff6b61;
+  --danger-bg: rgba(255, 107, 97, 0.12);
+  --danger-strong: #ff8b83;
+
+  --success: #34d399;
+  --success-bg: rgba(52, 211, 153, 0.1);
+
+  --dot-grid: rgba(255, 255, 255, 0.05);
   --shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
-  --glass-bg: rgba(20, 20, 20, 0.5);
-  --glass-bg-raised: rgba(28, 28, 28, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.09);
-  --glass-highlight: rgba(255, 255, 255, 0.07);
-  --glass-shadow: 0 1px 1px rgba(255, 255, 255, 0.04), 0 16px 40px -16px rgba(0, 0, 0, 0.6);
+  --glass-bg: rgba(13, 21, 38, 0.55);
+  --glass-bg-raised: rgba(17, 28, 48, 0.66);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 1px 1px rgba(255, 255, 255, 0.04), 0 16px 40px -16px rgba(0, 0, 0, 0.65);
   color-scheme: dark;
 }
 
