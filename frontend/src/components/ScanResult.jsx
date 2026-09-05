@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { analyzePatterns } from '../lib/heuristics'
+import FeedbackWidget from './FeedbackWidget'
 
 function interpretation(pct) {
   if (pct < 20) return 'LOW SPAM PROBABILITY'
@@ -26,7 +27,7 @@ function useAnimatedPercent(target) {
   return value
 }
 
-export default function ScanResult({ result, message, onCopy, onExport }) {
+export default function ScanResult({ result, message, onCopy, onExport, messageId }) {
   const pct = result.spam_probability * 100
   const animated = useAnimatedPercent(pct)
   const isSpam = result.label === 'spam'
@@ -72,6 +73,13 @@ export default function ScanResult({ result, message, onCopy, onExport }) {
           prediction — the API only returns a label and a probability.
         </p>
       </div>
+
+      {messageId && (
+        <>
+          <div className="divider" />
+          <FeedbackWidget messageId={messageId} />
+        </>
+      )}
 
       <div className="result-actions mono">
         <button type="button" onClick={onCopy}>

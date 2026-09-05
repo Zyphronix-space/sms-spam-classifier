@@ -18,7 +18,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 class AdminStatsOut(BaseModel):
     total_users: int
-    total_scans: int
+    total_messages: int
     spam: int
     ham: int
     spam_rate: float
@@ -29,7 +29,7 @@ class AdminUserOut(BaseModel):
     email: str
     is_admin: bool
     created_at: str
-    scan_count: int
+    message_count: int
 
 
 class AdminScanOut(BaseModel):
@@ -49,9 +49,13 @@ def admin_stats(_: dict = Depends(auth.get_current_admin)):
                 """
                 SELECT
                     COUNT(*) AS total,
-                    COUNT(*) FILTER (WHERE classification = 'spam') AS spam,
-                    COUNT(*) FILTER (WHERE classification = 'ham') AS ham
-                FROM scans
+                    COUNT(*) FILTER (WHERE p.classification = 'spam') AS spam,
+                    COUNT(*) FILTER (WHERE p.classification = 'ham') AS ham
+                FROM messages m
+                JOIN LATERAL (
+                    SELECT classification FROM predictions
+                    WHERE message_id = m.id ORDER BY created_at DESC LIMIT 1
+                ) p ON true
                 """
             ).fetchone()
     except Exception:
@@ -61,7 +65,7 @@ def admin_stats(_: dict = Depends(auth.get_current_admin)):
     spam_rate = (spam / total * 100) if total else 0.0
     return AdminStatsOut(
         total_users=total_users,
-        total_scans=total,
+        total_messages=total,
         spam=spam,
         ham=ham,
         spam_rate=round(spam_rate, 2),
@@ -74,9 +78,9 @@ def admin_list_users(_: dict = Depends(auth.get_current_admin)):
         with db.pool.connection() as conn:
             rows = conn.execute(
                 """
-                SELECT u.id, u.email, u.is_admin, u.created_at, COUNT(s.id) AS scan_count
+                SELECT u.id, u.email, u.is_admin, u.created_at, COUNT(m.id) AS message_count
                 FROM users u
-                LEFT JOIN scans s ON s.user_id = u.id
+                LEFT JOIN messages m ON m.user_id = u.id
                 GROUP BY u.id
                 ORDER BY u.created_at DESC
                 """
@@ -86,7 +90,7 @@ def admin_list_users(_: dict = Depends(auth.get_current_admin)):
 
     return [
         AdminUserOut(
-            id=str(r[0]), email=r[1], is_admin=r[2], created_at=r[3].isoformat(), scan_count=r[4]
+            id=str(r[0]), email=r[1], is_admin=r[2], created_at=r[3].isoformat(), message_count=r[4]
         )
         for r in rows
     ]
@@ -113,21 +117,25 @@ def admin_delete_user(user_id: str, admin: dict = Depends(auth.get_current_admin
     return {"message": "deleted"}
 
 
-@router.get("/scans", response_model=list[AdminScanOut])
-def admin_recent_scans(_: dict = Depends(auth.get_current_admin)):
+@router.get("/messages", response_model=list[AdminScanOut])
+def admin_recent_messages(_: dict = Depends(auth.get_current_admin)):
     try:
         with db.pool.connection() as conn:
             rows = conn.execute(
                 """
-                SELECT s.id, u.email, s.classification, s.spam_probability, s.created_at
-                FROM scans s
-                JOIN users u ON u.id = s.user_id
-                ORDER BY s.created_at DESC
+                SELECT m.id, u.email, p.classification, p.spam_probability, p.created_at
+                FROM messages m
+                JOIN users u ON u.id = m.user_id
+                JOIN LATERAL (
+                    SELECT classification, spam_probability, created_at FROM predictions
+                    WHERE message_id = m.id ORDER BY created_at DESC LIMIT 1
+                ) p ON true
+                ORDER BY p.created_at DESC
                 LIMIT 100
                 """
             ).fetchall()
     except Exception:
-        raise HTTPException(status_code=500, detail="could not load scans")
+        raise HTTPException(status_code=500, detail="could not load messages")
 
     return [
         AdminScanOut(

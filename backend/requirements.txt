@@ -8,3 +8,6 @@ psycopg-pool
 bcrypt
 pyjwt
 python-dotenv
+python-multipart
+pytest
+httpx

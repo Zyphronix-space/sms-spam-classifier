@@ -74,6 +74,32 @@ function relayResponse(http:Response backendResp) returns http:Response {
     return outResp;
 }
 
+// Like relayResponse, but for a non-JSON body (the CSV export) — copies the
+// raw bytes, Content-Type, and Content-Disposition instead of assuming JSON.
+function relayFileResponse(http:Response backendResp) returns http:Response {
+    http:Response outResp = new;
+    outResp.statusCode = backendResp.statusCode;
+
+    if backendResp.statusCode >= 400 {
+        return relayResponse(backendResp);
+    }
+
+    string|error contentType = backendResp.getHeader("Content-Type");
+    string|error disposition = backendResp.getHeader("Content-Disposition");
+    byte[]|error body = backendResp.getBinaryPayload();
+
+    if body is byte[] {
+        outResp.setBinaryPayload(body);
+    }
+    if contentType is string {
+        outResp.setHeader("Content-Type", contentType);
+    }
+    if disposition is string {
+        outResp.setHeader("Content-Disposition", disposition);
+    }
+    return outResp;
+}
+
 function proxyWithCookie(http:Request req, string method, string path) returns http:Response {
     map<string|string[]> headers = forwardedHeaders(req);
     http:Response|error backendResp;
@@ -91,10 +117,26 @@ function proxyWithCookie(http:Request req, string method, string path) returns h
     return relayResponse(backendResp);
 }
 
+// PUT variant of proxyWithCookie that forwards the request body — used for
+// PUT /messages/{id} (editing message text).
+function proxyPutWithBody(http:Request req, string path) returns http:Response {
+    map<string|string[]> headers = forwardedHeaders(req);
+    json|error payload = req.getJsonPayload();
+    if payload is error {
+        return jsonError(400, "request body must be JSON");
+    }
+    http:Response|error backendResp = backendClient->put(path, payload, headers);
+    if backendResp is error {
+        log:printError("backend call failed", 'error = backendResp);
+        return jsonError(502, "backend unavailable");
+    }
+    return relayResponse(backendResp);
+}
+
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["http://localhost:5173", "https://mango-grass-0eaa0a500.7.azurestaticapps.net"],
-        allowMethods: ["GET", "POST", "DELETE"],
+        allowMethods: ["GET", "POST", "PUT", "DELETE"],
         allowHeaders: ["Content-Type", "x-api-key"],
         allowCredentials: true
     }
@@ -196,46 +238,118 @@ service / on new http:Listener(9000) {
         return proxyWithCookie(req, "GET", "/auth/me");
     }
 
-    resource function get scans(http:Request req) returns http:Response {
+    // GET /messages?q=&classification=&sort=&limit=&offset= — query string
+    // passthrough via req.rawPath, since this is the first GET route that
+    // needs one (the older GET routes below take no query params).
+    resource function get messages(http:Request req) returns http:Response {
         if !isValidApiKey(req) {
             return jsonError(401, "missing or invalid x-api-key header");
         }
-        return proxyWithCookie(req, "GET", "/scans");
+        return proxyWithCookie(req, "GET", req.rawPath);
     }
 
-    resource function delete scans(http:Request req) returns http:Response {
+    resource function post messages(http:Request req) returns http:Response {
         if !isValidApiKey(req) {
             return jsonError(401, "missing or invalid x-api-key header");
         }
-        return proxyWithCookie(req, "DELETE", "/scans");
+        map<string|string[]> headers = forwardedHeaders(req);
+        json|error payload = req.getJsonPayload();
+        if payload is error {
+            return jsonError(400, "request body must be JSON");
+        }
+        http:Response|error backendResp = backendClient->post("/messages", payload, headers);
+        if backendResp is error {
+            log:printError("backend call failed", 'error = backendResp);
+            return jsonError(502, "backend unavailable");
+        }
+        return relayResponse(backendResp);
     }
 
-    resource function delete scans/[string id](http:Request req) returns http:Response {
+    resource function get messages/[string id](http:Request req) returns http:Response {
         if !isValidApiKey(req) {
             return jsonError(401, "missing or invalid x-api-key header");
         }
-        return proxyWithCookie(req, "DELETE", "/scans/" + id);
+        return proxyWithCookie(req, "GET", "/messages/" + id);
     }
 
-    resource function post scans/[string id]/save(http:Request req) returns http:Response {
+    resource function put messages/[string id](http:Request req) returns http:Response {
         if !isValidApiKey(req) {
             return jsonError(401, "missing or invalid x-api-key header");
         }
-        return proxyWithCookie(req, "POST", "/scans/" + id + "/save");
+        return proxyPutWithBody(req, "/messages/" + id);
     }
 
-    resource function delete scans/[string id]/save(http:Request req) returns http:Response {
+    resource function delete messages/[string id](http:Request req) returns http:Response {
         if !isValidApiKey(req) {
             return jsonError(401, "missing or invalid x-api-key header");
         }
-        return proxyWithCookie(req, "DELETE", "/scans/" + id + "/save");
+        return proxyWithCookie(req, "DELETE", "/messages/" + id);
     }
 
-    resource function get stats(http:Request req) returns http:Response {
+    resource function get messages/[string id]/feedback(http:Request req) returns http:Response {
         if !isValidApiKey(req) {
             return jsonError(401, "missing or invalid x-api-key header");
         }
-        return proxyWithCookie(req, "GET", "/stats");
+        return proxyWithCookie(req, "GET", "/messages/" + id + "/feedback");
+    }
+
+    resource function post messages/[string id]/feedback(http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        map<string|string[]> headers = forwardedHeaders(req);
+        json|error payload = req.getJsonPayload();
+        if payload is error {
+            return jsonError(400, "request body must be JSON");
+        }
+        http:Response|error backendResp = backendClient->post("/messages/" + id + "/feedback", payload, headers);
+        if backendResp is error {
+            log:printError("backend call failed", 'error = backendResp);
+            return jsonError(502, "backend unavailable");
+        }
+        return relayResponse(backendResp);
+    }
+
+    resource function get feedback(http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        return proxyWithCookie(req, "GET", "/feedback");
+    }
+
+    // Multipart CSV upload — forward the whole request (body + Content-Type
+    // boundary) as-is, the same way auth/register already forwards `req`
+    // wholesale rather than reconstructing a JSON payload.
+    resource function post batch(http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        http:Response|error backendResp = backendClient->post("/batch", req);
+        if backendResp is error {
+            log:printError("backend call failed", 'error = backendResp);
+            return jsonError(502, "backend unavailable");
+        }
+        return relayResponse(backendResp);
+    }
+
+    resource function get batch/[string id]/export(http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        map<string|string[]> headers = forwardedHeaders(req);
+        http:Response|error backendResp = backendClient->get("/batch/" + id + "/export", headers);
+        if backendResp is error {
+            log:printError("backend call failed", 'error = backendResp);
+            return jsonError(502, "backend unavailable");
+        }
+        return relayFileResponse(backendResp);
+    }
+
+    resource function get dashboard(http:Request req) returns http:Response {
+        if !isValidApiKey(req) {
+            return jsonError(401, "missing or invalid x-api-key header");
+        }
+        return proxyWithCookie(req, "GET", "/dashboard");
     }
 
     resource function get model(http:Request req) returns http:Response {
@@ -266,10 +380,10 @@ service / on new http:Listener(9000) {
         return proxyWithCookie(req, "DELETE", "/admin/users/" + id);
     }
 
-    resource function get admin/scans(http:Request req) returns http:Response {
+    resource function get admin/messages(http:Request req) returns http:Response {
         if !isValidApiKey(req) {
             return jsonError(401, "missing or invalid x-api-key header");
         }
-        return proxyWithCookie(req, "GET", "/admin/scans");
+        return proxyWithCookie(req, "GET", "/admin/messages");
     }
 }

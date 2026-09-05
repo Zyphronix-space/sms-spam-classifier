@@ -1,16 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import Header from './components/Header'
+import Sidebar from './components/Sidebar'
 import MessageScanner, { SCAN_STAGES } from './components/MessageScanner'
 import ScanResult from './components/ScanResult'
 import SystemStatus from './components/SystemStatus'
 import Pipeline from './components/Pipeline'
-import ScanHistory from './components/ScanHistory'
+import MessageHistory from './components/MessageHistory'
 import BatchScanner from './components/BatchScanner'
 import ModelLab from './components/ModelLab'
-import Statistics from './components/Statistics'
+import Dashboard from './components/Dashboard'
+import FeedbackPage from './components/FeedbackPage'
 import AdminPanel from './components/AdminPanel'
 import Auth from './components/Auth'
+import { ToastProvider, useToast } from './components/Toast'
 import { api, ApiError } from './lib/api'
 import { addLocalScan } from './lib/localHistory'
 import { useTheme } from './lib/useTheme'
@@ -33,19 +36,23 @@ function errorContent(err) {
   }
 }
 
-function App() {
+function AppInner() {
+  const toast = useToast()
   const [theme, cycleTheme] = useTheme()
-  const [activeTab, setActiveTab] = useState('scanner')
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [health, setHealth] = useState(null)
 
   const [user, setUser] = useState(null)
   const [authView, setAuthView] = useState(null)
   const [authError, setAuthError] = useState(null)
   const [authLoading, setAuthLoading] = useState(false)
-  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+  const [dataRefreshKey, setDataRefreshKey] = useState(0)
+  const [openMessageId, setOpenMessageId] = useState(null)
 
   const [message, setMessage] = useState('')
   const [result, setResult] = useState(null)
+  const [resultMessageId, setResultMessageId] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [scanStage, setScanStage] = useState(0)
@@ -87,6 +94,7 @@ function App() {
   const handleAnalyze = async () => {
     setError(null)
     setResult(null)
+    setResultMessageId(null)
     setLoading(true)
     setScanStage(0)
     scannedMessageRef.current = message
@@ -96,14 +104,20 @@ function App() {
     }, 260)
 
     try {
-      const res = await api.predict(message)
-      clearInterval(interval)
-      setScanStage(SCAN_STAGES.length - 1)
-      await new Promise((resolve) => setTimeout(resolve, 250))
-      setResult(res)
       if (user) {
-        setHistoryRefreshKey((k) => k + 1)
+        const res = await api.createMessage(message)
+        clearInterval(interval)
+        setScanStage(SCAN_STAGES.length - 1)
+        await new Promise((resolve) => setTimeout(resolve, 250))
+        setResult(res)
+        setResultMessageId(res.id)
+        setDataRefreshKey((k) => k + 1)
       } else {
+        const res = await api.predict(message)
+        clearInterval(interval)
+        setScanStage(SCAN_STAGES.length - 1)
+        await new Promise((resolve) => setTimeout(resolve, 250))
+        setResult(res)
         addLocalScan({ message, classification: res.label, spam_probability: res.spam_probability })
       }
     } catch (err) {
@@ -117,6 +131,7 @@ function App() {
   const handleClear = () => {
     setMessage('')
     setResult(null)
+    setResultMessageId(null)
     setError(null)
   }
 
@@ -165,7 +180,8 @@ function App() {
       const u = await fn(email, password)
       setUser(u)
       setAuthView(null)
-      setHistoryRefreshKey((k) => k + 1)
+      setDataRefreshKey((k) => k + 1)
+      toast.success(authView === 'login' ? 'Welcome back.' : 'Account created.')
     } catch (err) {
       setAuthError(err instanceof ApiError ? err.message || 'Authentication failed.' : 'Authentication failed.')
     } finally {
@@ -180,62 +196,102 @@ function App() {
       // clear local state regardless — the cookie is gone or invalid either way
     }
     setUser(null)
-    setHistoryRefreshKey((k) => k + 1)
+    setDataRefreshKey((k) => k + 1)
+  }
+
+  const openMessageInHistory = (id) => {
+    setOpenMessageId(id)
+    setActiveTab('history')
   }
 
   return (
-    <div className="app">
-      <Header
-        theme={theme}
-        onCycleTheme={cycleTheme}
-        health={health}
-        user={user}
-        onLogout={handleLogout}
-        onOpenAuth={(mode) => {
-          setAuthView(mode)
-          setAuthError(null)
-        }}
+    <div className="app-shell">
+      <Sidebar
         activeTab={activeTab}
         onChangeTab={setActiveTab}
+        isAdmin={user?.is_admin}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
+      <div className="app-content">
+        <Header
+          theme={theme}
+          onCycleTheme={cycleTheme}
+          health={health}
+          user={user}
+          onLogout={handleLogout}
+          onOpenAuth={(mode) => {
+            setAuthView(mode)
+            setAuthError(null)
+          }}
+          onToggleSidebar={() => setSidebarOpen((v) => !v)}
+        />
 
-      <main className="app-main">
-        {activeTab === 'scanner' && (
-          <div className="layout-grid">
-            <div className="layout-main">
-              <MessageScanner
-                message={message}
-                onMessageChange={setMessage}
-                onAnalyze={handleAnalyze}
-                onClear={handleClear}
-                loading={loading}
-                scanStageIndex={scanStage}
-              />
+        <main className="app-main">
+          {activeTab === 'dashboard' && (
+            user ? (
+              <Dashboard refreshKey={dataRefreshKey} onOpenMessage={openMessageInHistory} />
+            ) : (
+              <section className="panel empty-state">
+                <p className="panel-title mono">DASHBOARD</p>
+                <p className="text-muted mono">SIGN IN TO SEE YOUR DASHBOARD</p>
+                <p className="text-faint">Register or log in to track messages, spam rate, and trends over time.</p>
+              </section>
+            )
+          )}
 
-              {error && !loading && (
-                <div className="panel error-panel mono" role="alert">
-                  <p className="error-title">{errorContent(error).title}</p>
-                  <p>{errorContent(error).body}</p>
-                </div>
-              )}
+          {activeTab === 'scanner' && (
+            <div className="layout-grid">
+              <div className="layout-main">
+                <MessageScanner
+                  message={message}
+                  onMessageChange={setMessage}
+                  onAnalyze={handleAnalyze}
+                  onClear={handleClear}
+                  loading={loading}
+                  scanStageIndex={scanStage}
+                />
 
-              {result && !loading && (
-                <ScanResult result={result} message={scannedMessageRef.current} onCopy={handleCopy} onExport={handleExport} />
-              )}
+                {error && !loading && (
+                  <div className="panel error-panel mono" role="alert">
+                    <p className="error-title">{errorContent(error).title}</p>
+                    <p>{errorContent(error).body}</p>
+                  </div>
+                )}
+
+                {result && !loading && (
+                  <ScanResult
+                    result={result}
+                    message={scannedMessageRef.current}
+                    onCopy={handleCopy}
+                    onExport={handleExport}
+                    messageId={resultMessageId}
+                  />
+                )}
+              </div>
+              <div className="layout-side">
+                <SystemStatus health={health} />
+                <Pipeline health={health} />
+              </div>
             </div>
-            <div className="layout-side">
-              <SystemStatus health={health} />
-              <Pipeline health={health} />
-            </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'batch' && <BatchScanner />}
-        {activeTab === 'history' && <ScanHistory user={user} refreshKey={historyRefreshKey} />}
-        {activeTab === 'stats' && <Statistics user={user} refreshKey={historyRefreshKey} />}
-        {activeTab === 'model' && <ModelLab />}
-        {activeTab === 'admin' && user?.is_admin && <AdminPanel />}
-      </main>
+          {activeTab === 'batch' && <BatchScanner user={user} onSaved={() => setDataRefreshKey((k) => k + 1)} />}
+          {activeTab === 'history' && (
+            <MessageHistory
+              user={user}
+              refreshKey={dataRefreshKey}
+              openMessageId={openMessageId}
+              onOpenedMessage={() => setOpenMessageId(null)}
+            />
+          )}
+          {activeTab === 'model' && <ModelLab />}
+          {activeTab === 'feedback' && (
+            <FeedbackPage user={user} refreshKey={dataRefreshKey} onOpenMessage={openMessageInHistory} />
+          )}
+          {activeTab === 'admin' && user?.is_admin && <AdminPanel />}
+        </main>
+      </div>
 
       {authView && (
         <Auth
@@ -248,6 +304,14 @@ function App() {
         />
       )}
     </div>
+  )
+}
+
+function App() {
+  return (
+    <ToastProvider>
+      <AppInner />
+    </ToastProvider>
   )
 }
 

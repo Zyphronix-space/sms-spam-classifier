@@ -12,19 +12,19 @@ function formatTime(iso) {
 export default function AdminPanel() {
   const [stats, setStats] = useState(null)
   const [users, setUsers] = useState([])
-  const [scans, setScans] = useState([])
+  const [messages, setMessages] = useState([])
   const [error, setError] = useState(null)
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     let cancelled = false
     setError(null)
-    Promise.all([api.adminStats(), api.adminUsers(), api.adminScans()])
-      .then(([s, u, sc]) => {
+    Promise.all([api.adminStats(), api.adminUsers(), api.adminMessages()])
+      .then(([s, u, m]) => {
         if (cancelled) return
         setStats(s)
         setUsers(u)
-        setScans(sc)
+        setMessages(m)
       })
       .catch(() => !cancelled && setError('Could not load admin data.'))
     return () => {
@@ -33,7 +33,7 @@ export default function AdminPanel() {
   }, [refreshKey])
 
   const handleDeleteUser = async (id, email) => {
-    if (!window.confirm(`Delete account ${email}? This removes their scan history too.`)) return
+    if (!window.confirm(`Delete account ${email}? This removes their message history too.`)) return
     try {
       await api.adminDeleteUser(id)
       setRefreshKey((k) => k + 1)
@@ -70,8 +70,8 @@ export default function AdminPanel() {
             <span className="metric-value">{stats.total_users}</span>
           </div>
           <div>
-            <span className="metric-label">TOTAL SCANS</span>
-            <span className="metric-value">{stats.total_scans}</span>
+            <span className="metric-label">TOTAL MESSAGES</span>
+            <span className="metric-value">{stats.total_messages}</span>
           </div>
           <div>
             <span className="metric-label">SPAM RATE</span>
@@ -97,7 +97,7 @@ export default function AdminPanel() {
                   {u.email}
                   {u.is_admin ? ' · ADMIN' : ''}
                 </span>
-                <span className="text-muted">{u.scan_count} SCANS</span>
+                <span className="text-muted">{u.message_count} MESSAGES</span>
                 <button
                   type="button"
                   className="btn-ghost"
@@ -113,15 +113,15 @@ export default function AdminPanel() {
         )}
       </section>
 
-      <section className="panel" aria-labelledby="admin-scans-heading">
-        <h2 id="admin-scans-heading" className="panel-title mono">
-          RECENT SCANS (ALL USERS)
+      <section className="panel" aria-labelledby="admin-messages-heading">
+        <h2 id="admin-messages-heading" className="panel-title mono">
+          RECENT MESSAGES (ALL USERS)
         </h2>
-        {scans.length === 0 ? (
-          <p className="text-muted mono">NO SCANS YET</p>
+        {messages.length === 0 ? (
+          <p className="text-muted mono">NO MESSAGES YET</p>
         ) : (
           <ol className="history-list mono">
-            {scans.slice(0, 30).map((s, i) => (
+            {messages.slice(0, 30).map((s, i) => (
               <li key={s.id}>
                 <div className="history-row" style={{ cursor: 'default' }}>
                   <span className="history-index">{String(i + 1).padStart(2, '0')}</span>

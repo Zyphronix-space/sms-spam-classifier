@@ -1,31 +1,23 @@
-const TABS = [
-  { id: 'scanner', label: 'SCANNER' },
-  { id: 'batch', label: 'BATCH' },
-  { id: 'history', label: 'HISTORY' },
-  { id: 'stats', label: 'STATS' },
-  { id: 'model', label: 'MODEL LAB' },
-]
-
 const THEME_LABELS = { system: 'SYSTEM', dark: 'DARK', light: 'LIGHT' }
 
 function StatusDot({ ok }) {
   return <span className={`status-dot ${ok ? 'status-dot--ok' : 'status-dot--down'}`} aria-hidden="true" />
 }
 
-export default function Header({ theme, onCycleTheme, health, user, onLogout, onOpenAuth, activeTab, onChangeTab }) {
+export default function Header({ theme, onCycleTheme, health, user, onLogout, onOpenAuth, onToggleSidebar }) {
   const online = health?.gateway === 'online'
-  const tabs = user?.is_admin ? [...TABS, { id: 'admin', label: 'ADMIN' }] : TABS
 
   return (
     <header className="header">
       <div className="header-top">
-        <div className="brand">
-          <span className="brand-mark" aria-hidden="true" />
-          <div>
-            <h1>SMS / CLASSIFIER</h1>
-            <p className="brand-subtitle mono">MESSAGE THREAT ANALYSIS</p>
-          </div>
-        </div>
+        <button
+          type="button"
+          className="sidebar-toggle mono"
+          onClick={onToggleSidebar}
+          aria-label="Toggle navigation"
+        >
+          ☰
+        </button>
         <div className="header-controls">
           <span className="online-indicator mono">
             <StatusDot ok={online} />
@@ -53,19 +45,6 @@ export default function Header({ theme, onCycleTheme, health, user, onLogout, on
           )}
         </div>
       </div>
-      <nav className="tabs mono" aria-label="Views">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            className={`tab ${activeTab === tab.id ? 'tab--active' : ''}`}
-            onClick={() => onChangeTab(tab.id)}
-            aria-current={activeTab === tab.id ? 'page' : undefined}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </nav>
     </header>
   )
 }

@@ -1,6 +1,6 @@
 // Anonymous/demo-mode scan history. Lives only in this browser — never sent
 // to the backend. Logged-in users get PostgreSQL-backed history instead
-// (see api.scans / ScanHistory's account mode).
+// (see the Dashboard's message history view).
 const KEY = 'sms-classifier-local-history'
 const MAX_ENTRIES = 50
 
