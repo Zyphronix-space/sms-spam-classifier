@@ -1,5 +1,11 @@
 # SpamShield — AI Message Security Platform
 
+![Python](https://img.shields.io/badge/-Python-black?style=flat-square&logo=python&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/-scikit--learn-black?style=flat-square&logo=scikitlearn&logoColor=white)
+![FastAPI](https://img.shields.io/badge/-FastAPI-black?style=flat-square&logo=fastapi&logoColor=white)
+![Ballerina](https://img.shields.io/badge/-Ballerina-black?style=flat-square&logo=ballerina&logoColor=white)
+![React](https://img.shields.io/badge/-React-black?style=flat-square&logo=react&logoColor=white)
+
 A full-stack, AI-powered message security platform that classifies text
 messages as spam or ham (not spam), trained on the classic
 [SMS Spam Collection dataset](https://archive.ics.uci.edu/dataset/228/sms+spam+collection)
@@ -20,15 +26,15 @@ until it's redeployed — frontend and backend individually respond fine).
 Register an account to unlock the full platform: analysis, saved history,
 feedback, batch CSV scanning, and analytics.
 
-```
-frontend (React, sidebar layout)  ->  gateway (Ballerina, :9000)  ->  backend (FastAPI, :8000)
-                                                                            |
-                                                          +-----------------+-----------------+
-                                                          v                                   v
-                                                 ml/ (joblib model)                     PostgreSQL
-                                                                              (users, messages, predictions,
-                                                                               feedback, password reset tokens,
-                                                                               model_versions)
+```mermaid
+flowchart LR
+    F["Frontend<br/>React, sidebar layout"] --> G["Gateway<br/>Ballerina · :9000"]
+    G --> B["Backend<br/>FastAPI · :8000"]
+    B --> M["ml/<br/>joblib model"]
+    B --> D[("PostgreSQL<br/>users, messages, predictions,<br/>feedback, reset tokens, model_versions")]
+
+    classDef stage fill:#6C5CE7,stroke:#4834B0,color:#fff
+    class G,B stage
 ```
 
 ## What's here
