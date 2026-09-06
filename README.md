@@ -1,10 +1,14 @@
-# SpamShield — AI Message Security Platform
+<p align="center"><img src="docs/banner.svg" alt="SpamShield — AI message security platform" width="100%" /></p>
 
-![Python](https://img.shields.io/badge/-Python-black?style=flat-square&logo=python&logoColor=white)
-![scikit-learn](https://img.shields.io/badge/-scikit--learn-black?style=flat-square&logo=scikitlearn&logoColor=white)
-![FastAPI](https://img.shields.io/badge/-FastAPI-black?style=flat-square&logo=fastapi&logoColor=white)
-![Ballerina](https://img.shields.io/badge/-Ballerina-black?style=flat-square&logo=ballerina&logoColor=white)
-![React](https://img.shields.io/badge/-React-black?style=flat-square&logo=react&logoColor=white)
+<p align="center">
+<img src="https://img.shields.io/badge/-Python-0d0d16?style=flat-square&logo=python&logoColor=white" alt="Python" />
+<img src="https://img.shields.io/badge/-scikit--learn-0d0d16?style=flat-square&logo=scikitlearn&logoColor=white" alt="scikit-learn" />
+<img src="https://img.shields.io/badge/-FastAPI-0d0d16?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
+<img src="https://img.shields.io/badge/-Ballerina-0d0d16?style=flat-square&logo=ballerina&logoColor=white" alt="Ballerina" />
+<img src="https://img.shields.io/badge/-React-0d0d16?style=flat-square&logo=react&logoColor=white" alt="React" />
+</p>
+
+# SpamShield — AI Message Security Platform
 
 A full-stack, AI-powered message security platform that classifies text
 messages as spam or ham (not spam), trained on the classic
