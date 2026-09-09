@@ -58,7 +58,7 @@ export default function ModelLab() {
       <p className="text-faint">
         Architecture: raw message text is converted to TF-IDF (term-frequency, inverse-document-frequency)
         vectors, then classified by a Multinomial Naive Bayes model trained on an 80/20 train/test split of
-        the dataset below. Every metric on this page comes from that evaluation run — nothing here is
+        the dataset below. Every metric on this page comes from that evaluation run; nothing here is
         hand-tuned display data.
       </p>
 
@@ -109,7 +109,7 @@ export default function ModelLab() {
           <p className="mono">SELECTED MODEL: {comparison.selected_model.toUpperCase()}</p>
           <p className="text-faint">{comparison.selection_note}</p>
           <p className="text-faint">
-            F1 matters here — not just accuracy — because the dataset is imbalanced (~
+            F1 matters here, not just accuracy, because the dataset is imbalanced (~
             {((dataset.ham / dataset.total) * 100).toFixed(0)}% ham / ~{((dataset.spam / dataset.total) * 100).toFixed(0)}% spam):
             a model can score high accuracy while still missing most spam.
           </p>
@@ -162,7 +162,7 @@ export default function ModelLab() {
         </span>
         <DistBar pct={spamPct} tone="spam" />
       </div>
-      <p className="text-faint">UCI SMS Spam Collection — the full dataset, not just the test split.</p>
+      <p className="text-faint">UCI SMS Spam Collection: the full dataset, not just the test split.</p>
 
       <div className="divider" />
 

@@ -35,7 +35,7 @@ export default function FeedbackPage({ refreshKey, onOpenMessage }) {
         <h2 id="feedback-analytics-heading" className="panel-title mono">
           FEEDBACK ANALYTICS
         </h2>
-        <p className="text-faint mono">COMPUTED FROM YOUR SUBMITTED FEEDBACK — NOT USED TO RETRAIN THE MODEL</p>
+        <p className="text-faint mono">COMPUTED FROM YOUR SUBMITTED FEEDBACK, NOT USED TO RETRAIN THE MODEL</p>
         <div className="stats-grid mono">
           <div>
             <span className="metric-label">TOTAL FEEDBACK</span>
@@ -75,7 +75,7 @@ export default function FeedbackPage({ refreshKey, onOpenMessage }) {
                   <span className="history-index">{String(i + 1).padStart(2, '0')}</span>
                   <span className="history-preview">{formatTime(f.created_at)}</span>
                   <span className={f.is_correct ? 'text-success' : 'text-danger'}>
-                    {f.is_correct ? 'MARKED CORRECT' : `MARKED INCORRECT — ACTUAL: ${f.actual_classification?.toUpperCase()}`}
+                    {f.is_correct ? 'MARKED CORRECT' : `MARKED INCORRECT, ACTUAL: ${f.actual_classification?.toUpperCase()}`}
                   </span>
                 </button>
               </li>

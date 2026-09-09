@@ -23,7 +23,7 @@ export default function GlassNavbar() {
           LOG IN
         </GlassButton>
         <GlassButton variant="primary" onClick={() => navigate('/signup')}>
-          GET STARTED
+          CREATE ACCOUNT
         </GlassButton>
       </div>
     </header>

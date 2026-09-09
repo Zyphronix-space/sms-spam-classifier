@@ -28,12 +28,12 @@ export default function Landing() {
         <h1 className="hero-title">Stop spam before it reaches your inbox.</h1>
         <p className="hero-subtitle">
           SpamShield classifies SMS text in real time using a TF-IDF + Multinomial Naive Bayes
-          model trained on the UCI SMS Spam Collection — with a searchable history, CSV batch
+          model trained on the UCI SMS Spam Collection, with a searchable history, CSV batch
           scanning, and a feedback loop to track how the model is really doing.
         </p>
         <div className="hero-actions">
           <Link to="/signup">
-            <GlassButton variant="primary">GET STARTED — IT'S FREE</GlassButton>
+            <GlassButton variant="primary">CREATE A FREE ACCOUNT</GlassButton>
           </Link>
           <Link to="/features">
             <GlassButton variant="ghost">SEE HOW IT WORKS</GlassButton>
@@ -58,7 +58,7 @@ export default function Landing() {
       <section className="section">
         <h2 className="section-title">A real detection pipeline, not a black box</h2>
         <p className="section-subtitle">
-          Every classification comes from the same model, end to end — no fabricated confidence
+          Every classification comes from the same model, end to end: no fabricated confidence
           scores, no invented explanations.
         </p>
         <div className="feature-grid">
@@ -88,7 +88,7 @@ export default function Landing() {
               ⟲
             </div>
             <p className="panel-title mono">FEEDBACK LOOP</p>
-            <p className="text-muted">Flag a wrong call and record what it should have been — tracked, never silently auto-applied.</p>
+            <p className="text-muted">Flag a wrong call and record what it should have been. Tracked, never silently auto-applied.</p>
           </GlassCard>
         </div>
       </section>

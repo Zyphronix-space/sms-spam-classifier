@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Link, Outlet } from 'react-router-dom'
 import GlassNavbar from '../../components/glass/GlassNavbar'
 
 export default function PublicLayout() {
@@ -9,7 +9,12 @@ export default function PublicLayout() {
         <Outlet />
       </main>
       <footer className="public-footer mono">
-        SPAMSHIELD · TF-IDF + Multinomial Naive Bayes · UCI SMS Spam Collection
+        <p>SPAMSHIELD &middot; TF-IDF + Multinomial Naive Bayes &middot; UCI SMS Spam Collection</p>
+        <nav className="public-footer-links" aria-label="Legal">
+          <Link to="/privacy">Privacy Policy</Link>
+          <Link to="/terms">Terms and Conditions</Link>
+          <Link to="/cookies">Cookie Policy</Link>
+        </nav>
       </footer>
     </div>
   )

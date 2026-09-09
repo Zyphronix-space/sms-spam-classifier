@@ -41,7 +41,7 @@ export default function Pipeline({ health }) {
       </div>
       <p className="text-faint">
         The gateway checks the API key and validates the request body before forwarding to FastAPI, which runs
-        inference and — for logged-in users — persists the message and prediction to PostgreSQL. This diagram summarizes the
+        inference and, for logged-in users, persists the message and prediction to PostgreSQL. This diagram summarizes the
         real architecture; it is not a live per-request trace.
       </p>
     </section>

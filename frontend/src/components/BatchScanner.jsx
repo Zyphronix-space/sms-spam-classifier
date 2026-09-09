@@ -65,7 +65,7 @@ export default function BatchScanner({ onSaved }) {
       <h2 id="batch-heading" className="panel-title mono">
         BATCH ANALYSIS
       </h2>
-      <p className="text-faint mono">UPLOAD A CSV WITH A "message" COLUMN (OR "text"/"sms") — UP TO 500 ROWS, 1MB</p>
+      <p className="text-faint mono">UPLOAD A CSV WITH A "message" COLUMN (OR "text"/"sms"), UP TO 500 ROWS, 1MB</p>
 
       <div
         className={`csv-dropzone ${dragOver ? 'csv-dropzone--active' : ''}`}
@@ -128,7 +128,7 @@ export default function BatchScanner({ onSaved }) {
               <li key={r.row} className="batch-row">
                 <span className="history-index">{String(r.row).padStart(2, '0')}</span>
                 {r.error ? (
-                  <span className="error-text">SKIPPED — {r.error}</span>
+                  <span className="error-text">SKIPPED: {r.error}</span>
                 ) : (
                   <>
                     <span className="history-preview">{r.message}</span>

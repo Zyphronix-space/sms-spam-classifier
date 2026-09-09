@@ -56,6 +56,10 @@ export default function Signup() {
             hint="MIN. 8 CHARACTERS"
           />
           {error && <p className="error-text mono">{error}</p>}
+          <p className="text-faint auth-consent">
+            By creating an account you agree to the <Link to="/terms">Terms and Conditions</Link> and{' '}
+            <Link to="/privacy">Privacy Policy</Link>.
+          </p>
           <GlassButton type="submit" disabled={loading}>
             {loading ? 'PLEASE WAIT…' : 'CREATE ACCOUNT'}
           </GlassButton>

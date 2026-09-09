@@ -73,7 +73,7 @@ export default function AnalyzePage() {
 
   const handleCopy = () => {
     if (!result) return
-    const text = `${result.classification.toUpperCase()} — ${(result.spam_probability * 100).toFixed(2)}% spam probability`
+    const text = `${result.classification.toUpperCase()}: ${(result.spam_probability * 100).toFixed(2)}% spam probability`
     navigator.clipboard?.writeText(text)
   }
 

@@ -38,7 +38,7 @@ export default function FeedbackWidget({ messageId, existing, onSubmitted }) {
       })
       setFeedback(result)
       setShowActualPicker(false)
-      toast.success('Thanks — feedback saved.')
+      toast.success('Thanks, feedback saved.')
       onSubmitted?.(result)
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message || 'Could not save feedback.' : 'Could not save feedback.')
@@ -52,7 +52,7 @@ export default function FeedbackWidget({ messageId, existing, onSubmitted }) {
   if (feedback) {
     return (
       <p className="feedback-done mono">
-        FEEDBACK RECORDED: {feedback.is_correct ? 'CORRECT' : `INCORRECT — ACTUAL: ${feedback.actual_classification?.toUpperCase()}`}
+        FEEDBACK RECORDED: {feedback.is_correct ? 'CORRECT' : `INCORRECT, ACTUAL: ${feedback.actual_classification?.toUpperCase()}`}
       </p>
     )
   }

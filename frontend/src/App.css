@@ -1145,6 +1145,69 @@
   color: var(--text-faint);
   font-size: 12px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.public-footer-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+.public-footer-links a {
+  color: var(--text-faint);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+}
+.public-footer-links a:hover,
+.public-footer-links a:focus-visible {
+  color: var(--text-muted);
+}
+
+/* ---------- legal pages (Privacy / Terms / Cookies) ---------- */
+.legal-page {
+  max-width: 720px;
+  text-align: left;
+}
+.legal-title {
+  text-align: left;
+}
+.legal-updated {
+  margin-bottom: 24px;
+}
+.legal-page h2 {
+  margin-top: 28px;
+  margin-bottom: 8px;
+}
+.legal-page p {
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.legal-page a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.legal-list {
+  line-height: 1.6;
+  padding-left: 20px;
+  margin-bottom: 12px;
+}
+.legal-list li {
+  margin-bottom: 8px;
+}
+.auth-consent {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.auth-consent a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 @media (max-width: 640px) {

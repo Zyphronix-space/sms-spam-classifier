@@ -82,7 +82,7 @@ export default function AnalyticsPage() {
           <GlassMetric label="SPAM RATE" value={`${dashboard.spam_percentage.toFixed(1)}%`} tone="danger" />
           <GlassMetric
             label="FEEDBACK ACCURACY"
-            value={feedbackAccuracy === null ? '—' : `${feedbackAccuracy.toFixed(1)}%`}
+            value={feedbackAccuracy === null ? 'N/A' : `${feedbackAccuracy.toFixed(1)}%`}
             hint={feedbackAccuracy === null ? 'no feedback submitted yet' : `${feedback.length} feedback entries`}
           />
         </div>

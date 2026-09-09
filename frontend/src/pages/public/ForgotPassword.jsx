@@ -52,7 +52,7 @@ export default function ForgotPassword() {
             {result.demo_reset_link ? (
               <div className="demo-reset-banner">
                 <p className="mono text-accent">
-                  DEMO MODE — no email provider is configured for this project, so the reset link is
+                  DEMO MODE: no email provider is configured for this project, so the reset link is
                   shown here instead of being emailed. It expires in {result.expires_in_minutes} minutes
                   and can only be used once.
                 </p>

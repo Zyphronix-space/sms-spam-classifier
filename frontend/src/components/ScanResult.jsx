@@ -80,7 +80,7 @@ export default function ScanResult({ result, message, onCopy, onExport, messageI
         )}
         <p className="text-faint">
           Transparent pattern checks, computed separately from the ML model. They do not explain or influence its
-          prediction — the API only returns a label and a probability.
+          prediction: the API only returns a label and a probability.
         </p>
       </div>
 

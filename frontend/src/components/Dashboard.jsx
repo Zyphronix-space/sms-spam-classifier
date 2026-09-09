@@ -153,7 +153,7 @@ export default function Dashboard({ refreshKey }) {
           <h2 id="model-perf-heading" className="panel-subtitle mono">
             MODEL PERFORMANCE SNAPSHOT
           </h2>
-          <p className="text-faint">Training/test metrics from ml/evaluation.json — not this account's live predictions.</p>
+          <p className="text-faint">Training/test metrics from ml/evaluation.json, not this account's live predictions.</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={metricsBarData}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
