@@ -23,10 +23,9 @@ with. The frontend is an original "Liquid Glass" design system: blue,
 white, and dark navy, with a soft red reserved for spam/threat states ,
 not a copy of any vendor's design.
 
-**Live demo:** https://mango-grass-0eaa0a500.7.azurestaticapps.net
-(currently down: the Ballerina gateway container between the frontend and
-backend isn't running a real image, so classification requests will fail
-until it's redeployed: frontend and backend individually respond fine).
+**Live demo:** https://spamshield-green.vercel.app
+(all three tiers run on Vercel, see [Deployment](#deployment); the first
+request after a quiet spell takes a few extra seconds while they wake up).
 Register an account to unlock the full platform: analysis, saved history,
 feedback, batch CSV scanning, and analytics.
 
@@ -316,6 +315,21 @@ data.
 - **Not implemented, and out of scope for this pass**: email verification,
   distributed/shared rate limiting across multiple backend instances.
   Noted as remaining work, not silently skipped.
+
+## Deployment
+
+Everything runs on Vercel, as three projects plus a Neon Postgres database:
+
+| Tier | Vercel project | How it's built |
+|---|---|---|
+| Frontend | `frontend/` | Vite static build. `vercel.json` rewrites `/gw/*` to the gateway, so the browser only ever talks to its own origin and the HttpOnly session cookie stays first-party. `VITE_API_URL=/gw` in `.env.production`. |
+| Gateway | `gateway/` | Container function from `Dockerfile.vercel` (compiles the Ballerina service from source). Env: `BACKEND_URL`, `API_KEY`, `PORT=9000`. |
+| Backend | `backend/` | Python function (FastAPI). Copy the model artifacts in first: `mkdir -p backend/ml && cp ml/*.joblib ml/*.json backend/ml/`. Env: `DATABASE_URL` (Neon, pooled), `JWT_SECRET`, `COOKIE_SECURE=true`, `AUTO_MIGRATE=true`. |
+
+With `AUTO_MIGRATE=true` the backend applies pending `migrations/*.sql` on
+startup (guarded by a Postgres advisory lock so concurrent cold starts don't
+race), since the serverless deploy has no separate migration step. Deploy
+each tier with `vercel deploy --prod` from its directory.
 
 ## Testing
 

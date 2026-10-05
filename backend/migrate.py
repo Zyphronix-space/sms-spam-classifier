@@ -23,6 +23,9 @@ MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
 def main():
     files = sorted(MIGRATIONS_DIR.glob("*.sql"))
     with psycopg.connect(DATABASE_URL, autocommit=False) as conn:
+        # Serializes concurrent runners (e.g. several serverless instances
+        # cold-starting at once with AUTO_MIGRATE on); released at commit.
+        conn.execute("SELECT pg_advisory_xact_lock(727274)")
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS schema_migrations (

@@ -6,6 +6,7 @@ Run with:
     uvicorn main:app --reload
 """
 
+import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
@@ -24,6 +25,11 @@ from routers.model import _read_json
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Hosted deploys (Vercel) can't run `python migrate.py` from outside, so
+    # they opt in to applying pending migrations on startup instead.
+    if os.environ.get("AUTO_MIGRATE", "").lower() == "true":
+        import migrate
+        migrate.main()
     db.pool.open()
     evaluation = _read_json("evaluation.json")
     if evaluation is not None:

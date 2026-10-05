@@ -13,3 +13,6 @@ dist/
 *.log
 
 gateway/target/
+
+# Copied from ml/ at deploy time (see README Deployment)
+backend/ml/
